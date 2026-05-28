@@ -1,0 +1,5 @@
+We need to create and test end to end as a production type system so it should be working as 
+manual and MLflow both so that we can comapre. The process should be end to end. 
+Building data from any agrrigator like yfianance or duckduckgo or any other best , so that we can analyse 
+and utilise this model for stock predeiction. choose best availabel model from internet suits to our use case. 
+so that we can learn and utilise this for our productin mode and get the stock recommendation with more than 90% accurecy. 
