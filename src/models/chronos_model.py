@@ -7,10 +7,8 @@ Usage: feed raw Close price history → get next-day probabilistic forecast
 """
 
 import logging
-from typing import Optional
 
 import numpy as np
-import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -83,12 +81,11 @@ class ChronosModel:
                 num_samples=n_samples,
             )
             # forecast shape: (1, n_samples, prediction_length)
-            samples = forecast[0, :, 0].numpy()  # shape: (n_samples,)
+            samples = forecast[0, :, 0].float().cpu().numpy()  # shape: (n_samples,)
             current_price = float(close_series[-1])
             returns = (samples - current_price) / current_price
 
             # Convert each sample return to a signal class
-            from config_utils import _load_thresholds_or_default
             classes = np.array([self._return_to_signal(r) for r in returns])
             probs = np.bincount(classes, minlength=5).astype(float)
             probs /= probs.sum()

@@ -6,6 +6,7 @@ Saves an interactive HTML report to reports/drift/<date>_drift_report.html.
 """
 
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -150,5 +151,5 @@ def get_latest_drift_status(symbol: str) -> dict:
         "status": "ok",
         "symbol": symbol,
         "latest_report": str(latest),
-        "report_date": latest.stem.split("_")[1],
+        "report_date": (m.group(1) if (m := re.search(r"\d{8}_\d{6}", latest.stem)) else latest.stem),
     }

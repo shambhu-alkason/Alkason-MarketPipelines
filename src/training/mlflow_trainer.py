@@ -54,7 +54,8 @@ def _setup_mlflow(cfg: dict):
 
 def _log_confusion_matrix(y_true, y_pred, run) -> None:
     """Log a confusion matrix heatmap as MLflow artifact."""
-    import mlflow
+    import os
+    import mlflow as _mlflow
     cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2, 3, 4])
     fig, ax = plt.subplots(figsize=(8, 6))
     sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
@@ -62,15 +63,17 @@ def _log_confusion_matrix(y_true, y_pred, run) -> None:
     ax.set_xlabel("Predicted")
     ax.set_ylabel("Actual")
     ax.set_title("Confusion Matrix")
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
-        fig.savefig(f.name, bbox_inches="tight")
-        mlflow.log_artifact(f.name, "confusion_matrix.png")
+    with tempfile.NamedTemporaryFile(suffix="_confusion_matrix.png", delete=False) as f:
+        tmp_path = f.name
+    fig.savefig(tmp_path, bbox_inches="tight")
+    _mlflow.log_artifact(tmp_path)
+    os.unlink(tmp_path)
     plt.close(fig)
 
 
 def _log_shap_plot(model, X: np.ndarray, feature_names: list) -> None:
     """Log SHAP feature importance bar chart as MLflow artifact."""
-    import mlflow
+    import os, mlflow as _mlflow
     try:
         import shap
         explainer = shap.TreeExplainer(model.model)
@@ -85,9 +88,11 @@ def _log_shap_plot(model, X: np.ndarray, feature_names: list) -> None:
                 [importance[i] for i in reversed(top_idx)])
         ax.set_title("Top-20 Feature Importance (SHAP)")
         ax.set_xlabel("Mean |SHAP value|")
-        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
-            fig.savefig(f.name, bbox_inches="tight")
-            mlflow.log_artifact(f.name, "shap_importance.png")
+        with tempfile.NamedTemporaryFile(suffix="_shap_importance.png", delete=False) as f:
+            tmp_path = f.name
+        fig.savefig(tmp_path, bbox_inches="tight")
+        _mlflow.log_artifact(tmp_path)
+        os.unlink(tmp_path)
         plt.close(fig)
     except Exception as e:
         logger.warning("SHAP plot skipped: %s", e)
@@ -122,17 +127,27 @@ def train_symbol_mlflow(
 
     cfg = cfg or _load_config()
     tr_cfg = cfg["training"]
-    mlflow = _setup_mlflow(cfg)
+    _setup_mlflow(cfg)
 
     df = load_processed(symbol)
     feature_cols = [c for c in df.columns if c != "label"]
     X = df[feature_cols].values.astype(np.float32)
     y = df["label"].values.astype(int)
-    close = None  # Chronos-2 uses raw close — not in scaled features
+
+    # Load raw close prices for Chronos-2 (processed parquet only has indicators)
+    raw_path = Path(cfg["paths"]["raw_data"]) / f"{symbol}.csv"
+    close = None
+    if raw_path.exists():
+        raw_df = pd.read_csv(raw_path, index_col="date", parse_dates=True)
+        raw_df = raw_df.reindex(df.index).ffill()
+        close_col = next((c for c in ["close", "Close"] if c in raw_df.columns), None)
+        if close_col:
+            close = raw_df[close_col].values.astype(np.float32)
 
     split_idx = int(len(X) * (1 - tr_cfg["test_size"]))
     X_train, X_test = X[:split_idx], X[split_idx:]
     y_train, y_test = y[:split_idx], y[split_idx:]
+    close_train = close[:split_idx] if close is not None else None
     val_split = int(len(X_train) * 0.8)
 
     all_metrics = {}
@@ -208,7 +223,7 @@ def train_symbol_mlflow(
             lgbm_trials=min(tr_cfg["optuna_trials"], 20),
             lstm_epochs=30,
         )
-        ensemble.fit(X_train, y_train, feature_names=feature_cols)
+        ensemble.fit(X_train, y_train, feature_names=feature_cols, close_train=close_train)
         preds = ensemble.predict(X_test)
         m = _compute_metrics(y_test, preds)
         mlflow.log_metrics(m)

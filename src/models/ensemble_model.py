@@ -91,6 +91,7 @@ class StackingEnsemble:
         X_tr: np.ndarray,
         y_tr: np.ndarray,
         X_val: np.ndarray,
+        y_val: np.ndarray,
         close_tr: Optional[np.ndarray] = None,
         close_val: Optional[np.ndarray] = None,
         seq_len: int = 20,
@@ -120,20 +121,17 @@ class StackingEnsemble:
 
         # LightGBM (Optuna — fewer trials per fold for speed)
         lgbm = LGBMModel(self.symbol, n_trials=self.lgbm_trials, random_state=self.random_state)
-        lgbm.fit(X_tr_sm, y_tr_sm, X_val_sc, y_tr[:len(X_val_sc)],  # use small val for early stop
-                 feature_names=self.feature_names)
+        lgbm.fit(X_tr_sm, y_tr_sm, X_val_sc, y_val, feature_names=self.feature_names)
         meta[:, 0:5] = lgbm.predict_proba(X_val_sc)
 
         # XGBoost
         xgb_m = XGBoostModel(self.symbol, random_state=self.random_state)
-        xgb_m.fit(X_tr_sm, y_tr_sm, X_val_sc, y_tr[:len(X_val_sc)],
-                  feature_names=self.feature_names)
+        xgb_m.fit(X_tr_sm, y_tr_sm, X_val_sc, y_val, feature_names=self.feature_names)
         meta[:, 5:10] = xgb_m.predict_proba(X_val_sc)
 
         # PyTorch LSTM
         lstm_m = LSTMModel(self.symbol, epochs=self.lstm_epochs, random_state=self.random_state)
-        lstm_m.fit(X_tr_sm, y_tr_sm, X_val_sc, y_tr[:len(X_val_sc)],
-                   feature_names=self.feature_names)
+        lstm_m.fit(X_tr_sm, y_tr_sm, X_val_sc, y_val, feature_names=self.feature_names)
         meta[:, 10:15] = lstm_m.predict_proba(X_val_sc)
 
         # Chronos-2 (zero-shot — no training required; uses raw close prices)
@@ -185,7 +183,7 @@ class StackingEnsemble:
             close_val = close_train[val_idx] if close_train is not None else None
 
             logger.info("  Fold %d | train=%d val=%d", fold_idx + 1, len(X_tr), len(X_val))
-            fold_meta = self._fit_fold_models(X_tr, y_tr, X_val, close_tr, close_val, seq_len)
+            fold_meta = self._fit_fold_models(X_tr, y_tr, X_val, y_val, close_tr, close_val, seq_len)
 
             oof_meta[val_idx]  = fold_meta
             oof_valid[val_idx] = True

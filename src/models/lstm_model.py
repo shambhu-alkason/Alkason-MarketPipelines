@@ -172,7 +172,7 @@ class LSTMModel:
 
     @classmethod
     def load(cls, path: str) -> "LSTMModel":
-        data = torch.load(path, map_location="cpu")
+        data = torch.load(path, map_location="cpu", weights_only=False)
         cfg = data["config"]
         obj = cls(
             symbol=cfg["symbol"],

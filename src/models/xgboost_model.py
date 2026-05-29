@@ -48,7 +48,6 @@ class XGBoostModel:
             eval_metric="mlogloss",
             random_state=self.random_state,
             verbosity=0,
-            use_label_encoder=False,
         )
         self.model.fit(
             X_train, y_train,

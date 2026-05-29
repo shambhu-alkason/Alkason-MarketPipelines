@@ -6,6 +6,7 @@ All request/response models use Pydantic v2.
 import logging
 import os
 import pickle
+from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -19,10 +20,23 @@ from pydantic import BaseModel, Field, field_validator
 load_dotenv()
 logger = logging.getLogger(__name__)
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    logger.info("API started — pre-warming model cache for configured symbols ...")
+    for symbol in CFG["stocks"]["symbols"]:
+        try:
+            _load_ensemble(symbol)
+            logger.info("  Loaded model for %s", symbol)
+        except HTTPException:
+            logger.warning("  No model for %s — run training first", symbol)
+    yield
+
+
 app = FastAPI(
     title="AI-MLOps Stock Prediction API",
     description="Production-grade NSE/BSE stock prediction with LightGBM, XGBoost, LSTM, Chronos-2 + FinBERT sentiment",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # ── Config ────────────────────────────────────────────────────────────
@@ -50,7 +64,7 @@ def _load_ensemble(symbol: str):
     return _model_cache[key]
 
 
-def _get_latest_features(symbol: str) -> np.ndarray:
+def _get_latest_features(symbol: str) -> tuple:
     """Load the latest processed row for live prediction."""
     from src.data.features import load_processed
     df = load_processed(symbol)
@@ -115,20 +129,7 @@ class HealthResponse(BaseModel):
     timestamp: str
 
 
-# ── Startup ───────────────────────────────────────────────────────────
-
 _start_time = datetime.now()
-
-@app.on_event("startup")
-async def startup():
-    logger.info("API started — pre-warming model cache for configured symbols ...")
-    for symbol in CFG["stocks"]["symbols"]:
-        try:
-            _load_ensemble(symbol)
-            logger.info("  Loaded model for %s", symbol)
-        except HTTPException:
-            logger.warning("  No model for %s — run training first", symbol)
-
 
 # ── Endpoints ─────────────────────────────────────────────────────────
 
@@ -163,7 +164,7 @@ async def predict(request: PredictRequest):
     symbol = request.symbol
     model = _load_ensemble(symbol)
 
-    X, feature_cols = _get_latest_features(symbol)
+    X, _ = _get_latest_features(symbol)
     latest_X = X[-1:].reshape(1, -1)
 
     proba = model.predict_proba(latest_X)[0]

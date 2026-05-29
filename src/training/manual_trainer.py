@@ -86,7 +86,16 @@ def train_symbol(
     feature_cols = [c for c in df.columns if c != "label"]
     X = df[feature_cols].values.astype(np.float32)
     y = df["label"].values.astype(int)
-    close = df.get("close", pd.Series(np.ones(len(df)))).values if "close" in df.columns else None
+
+    # Load raw close prices for Chronos-2 (not in processed features parquet)
+    raw_path = Path(cfg["paths"]["raw_data"]) / f"{symbol}.csv"
+    close = None
+    if raw_path.exists():
+        raw_df = pd.read_csv(raw_path, index_col="date", parse_dates=True)
+        raw_df = raw_df.reindex(df.index).ffill()
+        close_col = next((c for c in ["close", "Close"] if c in raw_df.columns), None)
+        if close_col:
+            close = raw_df[close_col].values.astype(np.float32)
 
     # Chronological split
     split_idx = int(len(X) * (1 - tr_cfg["test_size"]))

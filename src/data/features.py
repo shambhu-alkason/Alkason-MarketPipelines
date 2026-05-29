@@ -84,16 +84,18 @@ def _compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     # Trend
     macd_df = ta.macd(c)
     if macd_df is not None and not macd_df.empty:
+        # pandas-ta macd() column order: MACD line, Histogram, Signal line
         feat["macd"]          = macd_df.iloc[:, 0]
-        feat["macd_signal"]   = macd_df.iloc[:, 1]
-        feat["macd_hist"]     = macd_df.iloc[:, 2]
+        feat["macd_hist"]     = macd_df.iloc[:, 1]
+        feat["macd_signal"]   = macd_df.iloc[:, 2]
     adx_df = ta.adx(h, l, c)
     if adx_df is not None and not adx_df.empty:
         feat["adx"] = adx_df.iloc[:, 0]
     aroon_df = ta.aroon(h, l)
     if aroon_df is not None and not aroon_df.empty:
-        feat["aroon_up"]   = aroon_df.iloc[:, 0]
-        feat["aroon_down"] = aroon_df.iloc[:, 1]
+        # pandas-ta aroon() column order: AROOND (down) first, AROONU (up) second
+        feat["aroon_down"] = aroon_df.iloc[:, 0]
+        feat["aroon_up"]   = aroon_df.iloc[:, 1]
 
     # Volatility
     bb = ta.bbands(c)

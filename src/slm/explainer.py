@@ -41,8 +41,9 @@ def _template_explanation(
         "negative" if sentiment_score < -0.1 else
         "neutral"
     )
+    class_key = next((k for k, v in SIGNAL_LABELS.items() if v == signal), 2)
     return (
-        f"{symbol} shows {SIGNAL_CONTEXT.get(list(SIGNAL_LABELS.values()).index(signal) if signal in SIGNAL_LABELS.values() else 2, 'mixed signals')} "
+        f"{symbol} shows {SIGNAL_CONTEXT.get(class_key, 'mixed signals')} "
         f"(confidence {confidence:.0%}). "
         f"Key drivers: {feat_str}. "
         f"News sentiment is {sentiment_label} (score: {sentiment_score:+.2f}). "
@@ -61,7 +62,7 @@ def _call_ollama(prompt: str, model: str, base_url: str) -> Optional[str]:
             messages=[{"role": "user", "content": prompt}],
             options={"temperature": 0.3, "num_predict": 150},
         )
-        return response["message"]["content"].strip()
+        return response.message.content.strip()
     except Exception as e:
         logger.warning("Ollama call failed (%s): %s", model, e)
         return None
