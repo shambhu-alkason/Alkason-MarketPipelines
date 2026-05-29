@@ -78,14 +78,16 @@ def run_drift_report(
             ref_df, curr_df = _load_reference_and_current(symbol, cfg)
             feature_cols = [c for c in ref_df.columns if c != "label"]
 
-            # Add prediction column if model available
-            preds = _get_predictions(symbol, curr_df[feature_cols].values.astype(np.float32), feature_cols, cfg)
-            if preds is not None:
+            # Add prediction columns — both current AND reference must use model outputs
+            curr_preds = _get_predictions(symbol, curr_df[feature_cols].values.astype(np.float32), feature_cols, cfg)
+            ref_preds  = _get_predictions(symbol, ref_df[feature_cols].values.astype(np.float32),  feature_cols, cfg)
+            if curr_preds is not None:
                 curr_df = curr_df.copy()
-                curr_df["prediction"] = preds
+                curr_df["prediction"] = curr_preds
                 ref_df = ref_df.copy()
-                # Reference predictions: reuse training predictions where available
-                ref_df["prediction"] = ref_df["label"]  # Approximate with label for reference
+                # Use actual model predictions on reference data so drift compares
+                # prediction distributions — not predictions vs ground-truth labels
+                ref_df["prediction"] = ref_preds if ref_preds is not None else ref_df["label"]
 
             # Build Evidently report
             report = Report(metrics=[

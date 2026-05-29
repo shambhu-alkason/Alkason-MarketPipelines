@@ -24,7 +24,6 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 import yaml
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
 logger = logging.getLogger(__name__)
@@ -50,11 +49,6 @@ def _dvc_track(file_path: str) -> None:
     except (FileNotFoundError, subprocess.TimeoutExpired):
         logger.debug("DVC not available — skipping tracking for %s", file_path)
 
-
-def _time_split(df: pd.DataFrame, test_size: float = 0.2):
-    """Chronological train/test split — no shuffle."""
-    split_idx = int(len(df) * (1 - test_size))
-    return df.iloc[:split_idx], df.iloc[split_idx:]
 
 
 def train_symbol(
@@ -113,7 +107,7 @@ def train_symbol(
              X_train[val_split:], y_train[val_split:],
              feature_names=feature_cols)
     preds = lgbm.predict(X_test)
-    metrics["lgbm"] = _compute_metrics(y_test, preds, lgbm.predict_proba(X_test))
+    metrics["lgbm"] = _compute_metrics(y_test, preds)
     lgbm_path = str(model_dir / f"{symbol}_lgbm.pkl")
     lgbm.save(lgbm_path)
     _dvc_track(lgbm_path)
@@ -124,7 +118,7 @@ def train_symbol(
                X_train[val_split:], y_train[val_split:],
                feature_names=feature_cols)
     preds = xgb_m.predict(X_test)
-    metrics["xgb"] = _compute_metrics(y_test, preds, xgb_m.predict_proba(X_test))
+    metrics["xgb"] = _compute_metrics(y_test, preds)
     xgb_path = str(model_dir / f"{symbol}_xgb.pkl")
     xgb_m.save(xgb_path)
     _dvc_track(xgb_path)
@@ -135,7 +129,7 @@ def train_symbol(
                X_train[val_split:], y_train[val_split:],
                feature_names=feature_cols)
     preds = lstm_m.predict(X_test)
-    metrics["lstm"] = _compute_metrics(y_test, preds, lstm_m.predict_proba(X_test))
+    metrics["lstm"] = _compute_metrics(y_test, preds)
     lstm_path = str(model_dir / f"{symbol}_lstm.pt")
     lstm_m.save(lstm_path)
     _dvc_track(lstm_path)
@@ -148,7 +142,7 @@ def train_symbol(
                  X_train[val_split:], y_train[val_split:],
                  feature_names=feature_cols, save_path=ag_save)
         preds = ag_m.predict(X_test, feature_names=feature_cols)
-        metrics["autogluon"] = _compute_metrics(y_test, preds, ag_m.predict_proba(X_test, feature_cols))
+        metrics["autogluon"] = _compute_metrics(y_test, preds)
         ag_path = str(model_dir / f"{symbol}_autogluon.pkl")
         ag_m.save(ag_path)
         _dvc_track(ag_path)
@@ -164,7 +158,7 @@ def train_symbol(
     )
     ensemble.fit(X_train, y_train, feature_names=feature_cols, close_train=close_train)
     preds = ensemble.predict(X_test, close=close_test)
-    metrics["ensemble"] = _compute_metrics(y_test, preds, ensemble.predict_proba(X_test, close=close_test))
+    metrics["ensemble"] = _compute_metrics(y_test, preds)
     ens_path = str(model_dir / f"{symbol}_ensemble.pkl")
     ensemble.save(ens_path)
     _dvc_track(ens_path)
@@ -173,13 +167,13 @@ def train_symbol(
     return metrics
 
 
-def _compute_metrics(y_true: np.ndarray, y_pred: np.ndarray, y_proba: np.ndarray) -> dict:
+def _compute_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     return {
         "accuracy":       float(accuracy_score(y_true, y_pred)),
         "macro_f1":       float(f1_score(y_true, y_pred, average="macro",    zero_division=0)),
         "weighted_f1":    float(f1_score(y_true, y_pred, average="weighted", zero_division=0)),
-        "buy_precision":  float(f1_score(y_true, y_pred, labels=[3, 4], average="macro", zero_division=0)),
-        "sell_precision": float(f1_score(y_true, y_pred, labels=[0, 1], average="macro", zero_division=0)),
+        "buy_f1":         float(f1_score(y_true, y_pred, labels=[3, 4], average="macro", zero_division=0)),
+        "sell_f1":        float(f1_score(y_true, y_pred, labels=[0, 1], average="macro", zero_division=0)),
         "report":         classification_report(y_true, y_pred,
                               target_names=["Strong Sell","Sell","Hold","Buy","Strong Buy"],
                               zero_division=0),
@@ -194,7 +188,7 @@ def _print_metrics_table(symbol: str, metrics: dict) -> None:
     print(f"  {'-'*68}")
     for name, m in metrics.items():
         print(f"  {name:<18} {m['accuracy']:>10.4f} {m['macro_f1']:>10.4f} "
-              f"{m['weighted_f1']:>12.4f} {m['buy_precision']:>8.4f} {m['sell_precision']:>8.4f}")
+              f"{m['weighted_f1']:>12.4f} {m['buy_f1']:>8.4f} {m['sell_f1']:>8.4f}")
     print(f"{'='*70}\n")
 
 

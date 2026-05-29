@@ -48,7 +48,6 @@ class AutoGluonModel:
         train_df["label"] = y_train.astype(int)
         val_df = pd.DataFrame(X_val, columns=cols)
         val_df["label"] = y_val.astype(int)
-        combined = pd.concat([train_df, val_df], ignore_index=True)
 
         self._save_path = save_path or f"/tmp/autogluon_{self.symbol}"
         if Path(self._save_path).exists():
@@ -61,7 +60,8 @@ class AutoGluonModel:
             eval_metric="f1_macro",
             verbosity=0,
         ).fit(
-            combined,
+            train_df,
+            tuning_data=val_df,   # val kept separate — same split as all other models
             time_limit=self.time_limit,
             presets="medium_quality",
             excluded_model_types=["KNN"],  # KNN very slow on large datasets

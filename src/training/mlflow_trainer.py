@@ -148,6 +148,7 @@ def train_symbol_mlflow(
     X_train, X_test = X[:split_idx], X[split_idx:]
     y_train, y_test = y[:split_idx], y[split_idx:]
     close_train = close[:split_idx] if close is not None else None
+    close_test  = close[split_idx:] if close is not None else None
     val_split = int(len(X_train) * 0.8)
 
     all_metrics = {}
@@ -200,7 +201,7 @@ def train_symbol_mlflow(
     if not skip_autogluon:
         with mlflow.start_run(run_name=f"autogluon_{symbol}"):
             mlflow.log_params({"symbol": symbol, "model": "AutoGluon", "time_limit": 300})
-            ag_m = AutoGluonModel(symbol, time_limit=300)
+            ag_m = AutoGluonModel(symbol, time_limit=300, random_state=tr_cfg["random_state"])
             ag_m.fit(X_train[:val_split], y_train[:val_split],
                      X_train[val_split:], y_train[val_split:],
                      feature_names=feature_cols)
@@ -224,7 +225,7 @@ def train_symbol_mlflow(
             lstm_epochs=30,
         )
         ensemble.fit(X_train, y_train, feature_names=feature_cols, close_train=close_train)
-        preds = ensemble.predict(X_test)
+        preds = ensemble.predict(X_test, close=close_test)
         m = _compute_metrics(y_test, preds)
         mlflow.log_metrics(m)
 
