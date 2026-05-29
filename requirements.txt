@@ -1,0 +1,79 @@
+# ── Data Ingestion ────────────────────────────────────────────────────
+openbb==4.7.2
+yfinance>=0.2.40
+
+# ── Technical Indicators ──────────────────────────────────────────────
+pandas-ta-classic>=0.3.14b; python_version>="3.8"
+# fallback: pandas-ta>=0.3.14b
+
+# ── Gradient Boosting ─────────────────────────────────────────────────
+lightgbm==4.6.0
+xgboost==3.2.0
+
+# ── Deep Learning ─────────────────────────────────────────────────────
+torch>=2.7.1
+torchvision>=0.22.0
+
+# ── Time Series Foundation Model ──────────────────────────────────────
+chronos-forecasting==2.2.2
+
+# ── AutoML Baseline ───────────────────────────────────────────────────
+autogluon==1.5.0
+
+# ── Hyperparameter Optimisation ───────────────────────────────────────
+optuna==4.8.0
+
+# ── Class Balancing ───────────────────────────────────────────────────
+imbalanced-learn==0.14.1
+
+# ── Experiment Tracking ───────────────────────────────────────────────
+mlflow==3.12.0
+
+# ── SLM — Sentiment ───────────────────────────────────────────────────
+transformers==5.9.0
+sentencepiece>=0.2.0
+
+# ── SLM — Explanation (Ollama client — optional) ──────────────────────
+ollama>=0.6.2
+
+# ── SLM — IBM watsonx (optional cloud alternative) ────────────────────
+ibm-watsonx-ai==1.5.12
+
+# ── News Scraping ─────────────────────────────────────────────────────
+ddgs==8.1.1
+newsapi-python>=0.2.7
+
+# ── Data Validation ───────────────────────────────────────────────────
+pandera==0.31.1
+pydantic==2.13.4
+
+# ── API Framework ─────────────────────────────────────────────────────
+fastapi>=0.116.1
+uvicorn==0.48.0
+
+# ── Drift Monitoring ──────────────────────────────────────────────────
+evidently==0.7.21
+
+# ── Model & Data Versioning ───────────────────────────────────────────
+dvc==3.67.1
+
+# ── Data Processing ───────────────────────────────────────────────────
+pandas==3.0.3
+numpy==2.4.6
+scipy>=1.14.0
+
+# ── ML Utilities ──────────────────────────────────────────────────────
+scikit-learn==1.8.0
+
+# ── Explainability ────────────────────────────────────────────────────
+shap==0.51.0
+
+# ── Visualisation ─────────────────────────────────────────────────────
+matplotlib==3.10.9
+seaborn==0.13.2
+
+# ── Config & Utilities ────────────────────────────────────────────────
+pyyaml==6.0.3
+python-dotenv==1.2.2
+tqdm>=4.67.0
+requests>=2.32.0

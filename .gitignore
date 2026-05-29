@@ -1,0 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables (never commit real credentials)
+.env
+
+# MLflow artifacts
+mlruns/
+mlartifacts/
+
+# Raw & processed data (large files — tracked by DVC)
+data/raw/
+data/processed/
+data/news/
+
+# Trained model binaries (tracked by DVC)
+models/manual/*.pkl
+models/manual/*.pt
+models/manual/*.joblib
+models/manual/*_autogluon/
+models/mlflow/
+
+# DVC internal (keep .dvc/ config but not cache)
+.dvc/cache/
+.dvc/tmp/
+
+# Reports (generated at runtime)
+reports/drift/
+reports/*.csv
+reports/*.png
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/

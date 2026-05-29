@@ -1,0 +1,63 @@
+# Docker Compose v2 — no version field (deprecated in Docker Compose v2+)
+# Requires: Docker Desktop installed
+# Start all services: docker-compose -f docker/docker-compose.yaml up
+
+services:
+
+  mlflow:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.mlflow
+    container_name: mlops_mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - ../mlruns:/mlruns
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: mlops_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../models:/app/models
+      - ../mlruns:/app/mlruns
+      - ../data:/app/data
+      - ../reports:/app/reports
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - OLLAMA_BASE_URL=http://ollama:11434
+    env_file:
+      - ../.env
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  ollama:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ollama
+    container_name: mlops_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_models:
+    name: mlops_ollama_models

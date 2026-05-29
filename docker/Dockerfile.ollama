@@ -1,0 +1,6 @@
+FROM ollama/ollama:latest
+
+EXPOSE 11434
+
+# Pull Granite 4.1-3B on container start (first run ~2GB download)
+ENTRYPOINT ["/bin/sh", "-c", "ollama serve & sleep 10 && ollama pull granite4.1:3b && wait"]
