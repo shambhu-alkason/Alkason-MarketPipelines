@@ -113,7 +113,9 @@ def download_symbol(
         logger.info("%s: %d rows already cached", symbol, len(existing))
 
     # Try OpenBB → yfinance
-    df = _fetch_openbb(symbol, period) or _fetch_yfinance(symbol, period)
+    df = _fetch_openbb(symbol, period)
+    if df is None:
+        df = _fetch_yfinance(symbol, period)
 
     if df is None:
         if existing is not None:

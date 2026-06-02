@@ -16,12 +16,16 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-# Try pandas-ta-classic first, fall back to pandas-ta
+# Try pandas-ta-classic first (numpy 2.x compatible), fall back to pandas-ta
 try:
-    import pandas_ta as ta
-    logger.info("Using pandas-ta-classic / pandas-ta")
+    import pandas_ta_classic as ta
+    logger.info("Using pandas-ta-classic")
 except ImportError:
-    raise ImportError("Install pandas-ta-classic or pandas-ta: pip install pandas-ta-classic")
+    try:
+        import pandas_ta as ta
+        logger.info("Using pandas-ta")
+    except ImportError:
+        raise ImportError("Install pandas-ta-classic: pip install pandas-ta-classic")
 
 
 def _load_config() -> dict:
@@ -207,7 +211,8 @@ def engineer_features(
     if available_core:
         feat = feat.dropna(subset=available_core)
 
-    # Fill any remaining NaNs with forward-fill then 0
+    # Replace inf (e.g. volume_roc when prior volume=0) then fill NaN
+    feat = feat.replace([np.inf, -np.inf], np.nan)
     feat = feat.ffill().fillna(0.0)
 
     # Ensure label is int

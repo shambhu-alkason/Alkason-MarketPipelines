@@ -1,0 +1,6 @@
+outs:
+- md5: 2b4d52d988575826eddc5ef963259278.dir
+  size: 995892704
+  nfiles: 206
+  hash: md5
+  path: manual
