@@ -1,2 +1,5 @@
 [core]
     autostage = true
+    remote = local_remote
+['remote "local_remote"']
+    url = /tmp/dvc-cache
