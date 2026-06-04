@@ -53,6 +53,10 @@ evidently>=0.7.0
 # ── Explainability ────────────────────────────────────────────────────────────
 shap>=0.45
 
+# ── Visualisation (imported by evaluator.py at module level) ──────────────────
+matplotlib>=3.7
+seaborn>=0.13
+
 # ── Config & Utilities ────────────────────────────────────────────────────────
 pyyaml>=6.0
 python-dotenv>=1.0
