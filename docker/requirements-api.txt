@@ -1,0 +1,57 @@
+# ── API container dependencies (inference-only, no training packages) ─────────
+# Excludes: autogluon, optuna, openbb, yfinance, pandas-ta, ibm-watsonx-ai,
+#           matplotlib, seaborn, dvc — none needed at serve time.
+
+# ── Data Processing ───────────────────────────────────────────────────────────
+pandas>=2.2,<3
+numpy>=1.26,<3
+scipy>=1.14.0
+
+# ── Gradient Boosting ─────────────────────────────────────────────────────────
+lightgbm>=4.5
+xgboost>=2.0
+
+# ── Deep Learning (CPU-only inside container) ──────────────────────────────────
+torch>=2.0
+torchvision>=0.15
+
+# ── Time Series Foundation Model ──────────────────────────────────────────────
+chronos-forecasting==2.2.2
+
+# ── ML Utilities ──────────────────────────────────────────────────────────────
+scikit-learn>=1.6,<1.8
+imbalanced-learn>=0.12
+
+# ── Experiment Tracking ───────────────────────────────────────────────────────
+mlflow==3.12.0
+
+# ── SLM — Sentiment ───────────────────────────────────────────────────────────
+transformers>=4.41,<5
+sentencepiece>=0.2.0
+
+# ── SLM — Explanation (Ollama client) ─────────────────────────────────────────
+ollama>=0.6.2
+
+# ── News Scraping ─────────────────────────────────────────────────────────────
+ddgs>=9.0
+newsapi-python>=0.2.7
+
+# ── Data Validation ───────────────────────────────────────────────────────────
+pandera>=0.20
+pydantic>=2.5
+
+# ── API Framework ─────────────────────────────────────────────────────────────
+fastapi>=0.100.0
+uvicorn>=0.20.0
+
+# ── Drift Monitoring ──────────────────────────────────────────────────────────
+evidently>=0.7.0
+
+# ── Explainability ────────────────────────────────────────────────────────────
+shap>=0.45
+
+# ── Config & Utilities ────────────────────────────────────────────────────────
+pyyaml>=6.0
+python-dotenv>=1.0
+tqdm>=4.60.0
+requests>=2.30.0

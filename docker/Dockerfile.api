@@ -7,9 +7,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential git curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies (inference-only subset — no autogluon/optuna/etc.)
+COPY docker/requirements-api.txt .
+RUN pip install --no-cache-dir -r requirements-api.txt
 
 # Pre-download FinBERT weights at build time so container starts fast
 RUN python -c "from transformers import AutoTokenizer, AutoModelForSequenceClassification; \
