@@ -30,7 +30,7 @@ imbalanced-learn==0.14.1
 mlflow==3.12.0
 
 # ── SLM — Sentiment ───────────────────────────────────────────────────
-transformers==5.9.0
+transformers>=4.41,<5
 sentencepiece>=0.2.0
 
 # ── SLM — Explanation (Ollama client — optional) ──────────────────────
