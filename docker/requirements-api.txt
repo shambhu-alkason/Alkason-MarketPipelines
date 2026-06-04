@@ -2,6 +2,9 @@
 # Excludes: autogluon, optuna, openbb, yfinance, pandas-ta, ibm-watsonx-ai,
 #           matplotlib, seaborn, dvc — none needed at serve time.
 
+# ── Technical Indicators (imported at module level in features.py) ────────────
+pandas-ta-classic>=0.3.14b
+
 # ── Data Processing ───────────────────────────────────────────────────────────
 pandas>=2.2,<3
 numpy>=1.26,<3
