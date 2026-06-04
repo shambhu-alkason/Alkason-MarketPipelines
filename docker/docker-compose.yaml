@@ -55,9 +55,7 @@ services:
     ports:
       - "11434:11434"
     volumes:
-      - ollama_models:/root/.ollama
+      - ~/.ollama:/root/.ollama
     restart: unless-stopped
 
-volumes:
-  ollama_models:
-    name: mlops_ollama_models
+volumes: {}
