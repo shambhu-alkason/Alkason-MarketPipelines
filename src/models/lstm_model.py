@@ -155,6 +155,29 @@ class LSTMModel:
     def predict(self, X: np.ndarray) -> np.ndarray:
         return np.argmax(self.predict_proba(X), axis=1)
 
+    def __getstate__(self) -> dict:
+        """Custom pickle: serialise PyTorch net as bytes to avoid MPS/OpenMP deadlock."""
+        import io
+        state = self.__dict__.copy()
+        if self.net is not None:
+            buf = io.BytesIO()
+            torch.save(self.net.state_dict(), buf)
+            state["_net_bytes"] = buf.getvalue()
+        else:
+            state["_net_bytes"] = None
+        state["net"] = None  # don't pickle the live nn.Module
+        return state
+
+    def __setstate__(self, state: dict) -> None:
+        """Custom unpickle: restore PyTorch net from bytes."""
+        import io
+        net_bytes = state.pop("_net_bytes", None)
+        self.__dict__.update(state)
+        if net_bytes is not None and self.n_features > 0:
+            self.net = _LSTMNet(self.n_features, self.hidden_size, self.num_layers, self.dropout)
+            self.net.load_state_dict(torch.load(io.BytesIO(net_bytes), map_location="cpu", weights_only=True))
+            self.net.eval()
+
     def save(self, path: str) -> None:
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         torch.save({
