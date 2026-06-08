@@ -71,6 +71,11 @@ def _get_latest_features(symbol: str) -> tuple:
     feature_cols = [c for c in df.columns if c != "label"]
     return df[feature_cols].values.astype(np.float32), feature_cols
 
+def _normalize_symbol(symbol: str) -> str:
+    symbol = symbol.upper().strip()
+    if "." not in symbol:
+        symbol = f"{symbol}.NS"
+    return symbol
 
 # ── Pydantic v2 Models ────────────────────────────────────────────────
 
@@ -81,6 +86,8 @@ class PredictRequest(BaseModel):
     @classmethod
     def validate_symbol(cls, v: str) -> str:
         v = v.upper().strip()
+        if "." not in v:
+            v = f"{v}.NS"
         if not (v.endswith(".NS") or v.endswith(".BO")):
             raise ValueError("Symbol must end with .NS (NSE) or .BO (BSE)")
         return v
@@ -92,7 +99,13 @@ class BatchPredictRequest(BaseModel):
     @field_validator("symbols")
     @classmethod
     def validate_symbols(cls, v: List[str]) -> List[str]:
-        return [s.upper().strip() for s in v]
+        normalized = []
+        for s in v:
+            s = s.upper().strip()
+            if "." not in s:
+                s = f"{s}.NS"
+            normalized.append(s)
+        return normalized
 
 
 class AskRequest(BaseModel):
@@ -241,7 +254,12 @@ async def predict_batch(request: BatchPredictRequest):
 @app.get("/recommendation/{symbol}", response_model=PredictionResponse, tags=["Prediction"])
 async def recommendation(symbol: str):
     """Full recommendation with explanation — main endpoint for users."""
-    return await predict(PredictRequest(symbol=symbol))
+    symbol = _normalize_symbol(symbol)
+    try:
+        request = PredictRequest(symbol=symbol)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    return await predict(request)
 
 
 @app.get("/sentiment/{symbol}", response_model=SentimentResponse, tags=["SLM"])

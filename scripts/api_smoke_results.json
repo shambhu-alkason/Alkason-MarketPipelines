@@ -1,0 +1,308 @@
+[
+  {
+    "id": "1",
+    "label": "Health",
+    "method": "GET",
+    "path": "/health",
+    "request_body": null,
+    "kind": "positive",
+    "status": 200,
+    "latency_ms": 2076.0,
+    "transport_error": null,
+    "response_text": "{\"status\":\"ok\",\"loaded_models\":[],\"uptime_seconds\":156.576219,\"timestamp\":\"2026-06-05T10:54:55.296348\"}",
+    "response_json": {
+      "status": "ok",
+      "loaded_models": [],
+      "uptime_seconds": 156.576219,
+      "timestamp": "2026-06-05T10:54:55.296348"
+    }
+  },
+  {
+    "id": "2",
+    "label": "Models",
+    "method": "GET",
+    "path": "/models",
+    "request_body": null,
+    "kind": "positive",
+    "status": 200,
+    "latency_ms": 2050.1,
+    "transport_error": null,
+    "response_text": "{\"models\":[],\"total\":0}",
+    "response_json": {
+      "models": [],
+      "total": 0
+    }
+  },
+  {
+    "id": "3",
+    "label": "Predict",
+    "method": "POST",
+    "path": "/predict",
+    "request_body": {
+      "symbol": "RELIANCE.NS"
+    },
+    "kind": "positive",
+    "status": 404,
+    "latency_ms": 2076.2,
+    "transport_error": null,
+    "response_text": "{\"detail\":\"No trained model found for RELIANCE.NS. Run: python main.py --mode train --trainer manual\"}",
+    "response_json": {
+      "detail": "No trained model found for RELIANCE.NS. Run: python main.py --mode train --trainer manual"
+    }
+  },
+  {
+    "id": "4",
+    "label": "Predict batch",
+    "method": "POST",
+    "path": "/predict/batch",
+    "request_body": {
+      "symbols": [
+        "RELIANCE.NS",
+        "TCS.NS",
+        "INFY.NS"
+      ]
+    },
+    "kind": "positive",
+    "status": 200,
+    "latency_ms": 2050.8,
+    "transport_error": null,
+    "response_text": "{\"predictions\":[],\"errors\":[{\"symbol\":\"RELIANCE.NS\",\"error\":\"404: No trained model found for RELIANCE.NS. Run: python main.py --mode train --trainer manual\"},{\"symbol\":\"TCS.NS\",\"error\":\"404: No trained model found for TCS.NS. Run: python main.py --mode train --trainer manual\"},{\"symbol\":\"INFY.NS\",\"error\":\"404: No trained model found for INFY.NS. Run: python main.py --mode train --trainer manual\"}],\"total\":0}",
+    "response_json": {
+      "predictions": [],
+      "errors": [
+        {
+          "symbol": "RELIANCE.NS",
+          "error": "404: No trained model found for RELIANCE.NS. Run: python main.py --mode train --trainer manual"
+        },
+        {
+          "symbol": "TCS.NS",
+          "error": "404: No trained model found for TCS.NS. Run: python main.py --mode train --trainer manual"
+        },
+        {
+          "symbol": "INFY.NS",
+          "error": "404: No trained model found for INFY.NS. Run: python main.py --mode train --trainer manual"
+        }
+      ],
+      "total": 0
+    }
+  },
+  {
+    "id": "5",
+    "label": "Recommendation",
+    "method": "GET",
+    "path": "/recommendation/RELIANCE.NS",
+    "request_body": null,
+    "kind": "positive",
+    "status": 404,
+    "latency_ms": 2068.9,
+    "transport_error": null,
+    "response_text": "{\"detail\":\"No trained model found for RELIANCE.NS. Run: python main.py --mode train --trainer manual\"}",
+    "response_json": {
+      "detail": "No trained model found for RELIANCE.NS. Run: python main.py --mode train --trainer manual"
+    }
+  },
+  {
+    "id": "6",
+    "label": "Sentiment",
+    "method": "GET",
+    "path": "/sentiment/RELIANCE",
+    "request_body": null,
+    "kind": "positive",
+    "status": 500,
+    "latency_ms": 2056.5,
+    "transport_error": null,
+    "response_text": "Internal Server Error",
+    "response_json": null
+  },
+  {
+    "id": "7",
+    "label": "Comparison",
+    "method": "GET",
+    "path": "/comparison",
+    "request_body": null,
+    "kind": "positive",
+    "status": 500,
+    "latency_ms": 2061.2,
+    "transport_error": null,
+    "response_text": "Internal Server Error",
+    "response_json": null
+  },
+  {
+    "id": "8",
+    "label": "Drift",
+    "method": "GET",
+    "path": "/drift",
+    "request_body": null,
+    "kind": "positive",
+    "status": 200,
+    "latency_ms": 2058.9,
+    "transport_error": null,
+    "response_text": "{\"symbols\":{\"RELIANCE.NS\":{\"status\":\"no_reports\",\"symbol\":\"RELIANCE.NS\"},\"TCS.NS\":{\"status\":\"no_reports\",\"symbol\":\"TCS.NS\"},\"INFY.NS\":{\"status\":\"no_reports\",\"symbol\":\"INFY.NS\"},\"HDFCBANK.NS\":{\"status\":\"no_reports\",\"symbol\":\"HDFCBANK.NS\"},\"WIPRO.NS\":{\"status\":\"no_reports\",\"symbol\":\"WIPRO.NS\"}},\"timestamp\":\"2026-06-05T10:55:09.720496\"}",
+    "response_json": {
+      "symbols": {
+        "RELIANCE.NS": {
+          "status": "no_reports",
+          "symbol": "RELIANCE.NS"
+        },
+        "TCS.NS": {
+          "status": "no_reports",
+          "symbol": "TCS.NS"
+        },
+        "INFY.NS": {
+          "status": "no_reports",
+          "symbol": "INFY.NS"
+        },
+        "HDFCBANK.NS": {
+          "status": "no_reports",
+          "symbol": "HDFCBANK.NS"
+        },
+        "WIPRO.NS": {
+          "status": "no_reports",
+          "symbol": "WIPRO.NS"
+        }
+      },
+      "timestamp": "2026-06-05T10:55:09.720496"
+    }
+  },
+  {
+    "id": "9",
+    "label": "Retrain",
+    "method": "POST",
+    "path": "/retrain?trainer=manual",
+    "request_body": null,
+    "kind": "positive",
+    "status": 500,
+    "latency_ms": 2062.7,
+    "transport_error": null,
+    "response_text": "Internal Server Error",
+    "response_json": null
+  },
+  {
+    "id": "10",
+    "label": "Ask",
+    "method": "POST",
+    "path": "/ask",
+    "request_body": {
+      "query": "Which stock shows the strongest buy signal this week?"
+    },
+    "kind": "positive",
+    "status": 200,
+    "latency_ms": 2061.5,
+    "transport_error": null,
+    "response_text": "{\"query\":\"Which stock shows the strongest buy signal this week?\",\"answer\":\"Based on current signals: No predictions available.\",\"timestamp\":\"2026-06-05T10:55:13.844942\"}",
+    "response_json": {
+      "query": "Which stock shows the strongest buy signal this week?",
+      "answer": "Based on current signals: No predictions available.",
+      "timestamp": "2026-06-05T10:55:13.844942"
+    }
+  },
+  {
+    "id": "N1",
+    "label": "Predict bad suffix",
+    "method": "POST",
+    "path": "/predict",
+    "request_body": {
+      "symbol": "RELIANCE.US"
+    },
+    "kind": "negative",
+    "status": 422,
+    "latency_ms": 2046.2,
+    "transport_error": null,
+    "response_text": "{\"detail\":[{\"type\":\"value_error\",\"loc\":[\"body\",\"symbol\"],\"msg\":\"Value error, Symbol must end with .NS (NSE) or .BO (BSE)\",\"input\":\"RELIANCE.US\",\"ctx\":{\"error\":{}}}]}",
+    "response_json": {
+      "detail": [
+        {
+          "type": "value_error",
+          "loc": [
+            "body",
+            "symbol"
+          ],
+          "msg": "Value error, Symbol must end with .NS (NSE) or .BO (BSE)",
+          "input": "RELIANCE.US",
+          "ctx": {
+            "error": {}
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "N2",
+    "label": "Predict normalize",
+    "method": "POST",
+    "path": "/predict",
+    "request_body": {
+      "symbol": "reliance"
+    },
+    "kind": "negative",
+    "status": 404,
+    "latency_ms": 2076.9,
+    "transport_error": null,
+    "response_text": "{\"detail\":\"No trained model found for RELIANCE.NS. Run: python main.py --mode train --trainer manual\"}",
+    "response_json": {
+      "detail": "No trained model found for RELIANCE.NS. Run: python main.py --mode train --trainer manual"
+    }
+  },
+  {
+    "id": "N3",
+    "label": "Ask too short",
+    "method": "POST",
+    "path": "/ask",
+    "request_body": {
+      "query": "hi"
+    },
+    "kind": "negative",
+    "status": 422,
+    "latency_ms": 2066.7,
+    "transport_error": null,
+    "response_text": "{\"detail\":[{\"type\":\"string_too_short\",\"loc\":[\"body\",\"query\"],\"msg\":\"String should have at least 5 characters\",\"input\":\"hi\",\"ctx\":{\"min_length\":5}}]}",
+    "response_json": {
+      "detail": [
+        {
+          "type": "string_too_short",
+          "loc": [
+            "body",
+            "query"
+          ],
+          "msg": "String should have at least 5 characters",
+          "input": "hi",
+          "ctx": {
+            "min_length": 5
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "N4",
+    "label": "Batch empty",
+    "method": "POST",
+    "path": "/predict/batch",
+    "request_body": {
+      "symbols": []
+    },
+    "kind": "negative",
+    "status": 422,
+    "latency_ms": 2065.7,
+    "transport_error": null,
+    "response_text": "{\"detail\":[{\"type\":\"too_short\",\"loc\":[\"body\",\"symbols\"],\"msg\":\"List should have at least 1 item after validation, not 0\",\"input\":[],\"ctx\":{\"field_type\":\"List\",\"min_length\":1,\"actual_length\":0}}]}",
+    "response_json": {
+      "detail": [
+        {
+          "type": "too_short",
+          "loc": [
+            "body",
+            "symbols"
+          ],
+          "msg": "List should have at least 1 item after validation, not 0",
+          "input": [],
+          "ctx": {
+            "field_type": "List",
+            "min_length": 1,
+            "actual_length": 0
+          }
+        }
+      ]
+    }
+  }
+]

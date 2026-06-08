@@ -1,0 +1,299 @@
+{
+  "info": {
+    "name": "AI-MLOps Stock Prediction API",
+    "_postman_id": "a1f2c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+    "description": "Importable Postman collection for the FastAPI service in src/api/app.py (v1.0.0).\n\nAll 10 endpoints plus negative/validator cases.\n\nBase URL is the `baseUrl` collection variable (default http://localhost:8000).\nConfigured symbols: RELIANCE.NS, TCS.NS, INFY.NS, HDFCBANK.NS, WIPRO.NS.\nNo authentication required.\n\nNote: /predict, /predict/batch, /recommendation, /comparison need trained models;\n/sentiment, /comparison, /retrain need the full ML stack (pandas/matplotlib/etc).\nSee docs/API_SMOKE_TEST_2026-06-05.md for expected responses in a bare environment.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "symbol",
+      "value": "RELIANCE.NS",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Core",
+      "item": [
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Liveness probe. Returns status, loaded model cache keys, uptime and timestamp. Always 200."
+          },
+          "response": []
+        },
+        {
+          "name": "Models",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/models",
+              "host": ["{{baseUrl}}"],
+              "path": ["models"]
+            },
+            "description": "Lists trained model artifacts found under models/manual/. Returns {models, total}. 200 even when empty."
+          },
+          "response": []
+        },
+        {
+          "name": "Drift",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/drift",
+              "host": ["{{baseUrl}}"],
+              "path": ["drift"]
+            },
+            "description": "Per-symbol drift report status. Returns 'no_reports' for symbols without a generated report. Always 200."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Predictions",
+      "item": [
+        {
+          "name": "Predict",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"RELIANCE.NS\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/predict",
+              "host": ["{{baseUrl}}"],
+              "path": ["predict"]
+            },
+            "description": "Single-symbol prediction. symbol is upper-cased and gets .NS appended if it has no suffix; must end with .NS or .BO. Returns 404 if no trained model exists for the symbol."
+          },
+          "response": []
+        },
+        {
+          "name": "Predict (batch)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbols\": [\"RELIANCE.NS\", \"TCS.NS\", \"INFY.NS\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/predict/batch",
+              "host": ["{{baseUrl}}"],
+              "path": ["predict", "batch"]
+            },
+            "description": "Batch prediction (1-20 symbols). Returns 200 with predictions[] and per-symbol errors[] — individual failures do not fail the whole request."
+          },
+          "response": []
+        },
+        {
+          "name": "Recommendation",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/recommendation/{{symbol}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendation", "{{symbol}}"]
+            },
+            "description": "Main user-facing recommendation for a symbol (path param, auto-normalized). Same response shape as /predict. 404 if no model."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Sentiment & Ask",
+      "item": [
+        {
+          "name": "Sentiment",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/sentiment/RELIANCE",
+              "host": ["{{baseUrl}}"],
+              "path": ["sentiment", "RELIANCE"]
+            },
+            "description": "FinBERT news sentiment for a symbol. Requires the ML stack (pandas/transformers) + network for news. Returns score/label/confidence/news_count."
+          },
+          "response": []
+        },
+        {
+          "name": "Ask",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"Which stock shows the strongest buy signal this week?\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ask",
+              "host": ["{{baseUrl}}"],
+              "path": ["ask"]
+            },
+            "description": "Natural-language Q&A over current signals (query 5-500 chars). Uses Ollama (granite4.1:3b) if available, else a template fallback."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Ops",
+      "item": [
+        {
+          "name": "Comparison",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/comparison",
+              "host": ["{{baseUrl}}"],
+              "path": ["comparison"]
+            },
+            "description": "Model comparison metrics table across symbols. Requires the ML stack (matplotlib) plus trained models and test data."
+          },
+          "response": []
+        },
+        {
+          "name": "Retrain",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/retrain?trainer=manual",
+              "host": ["{{baseUrl}}"],
+              "path": ["retrain"],
+              "query": [
+                {
+                  "key": "trainer",
+                  "value": "manual",
+                  "description": "manual (default) | mlflow"
+                }
+              ]
+            },
+            "description": "Kicks off retraining in the background. Returns 200 'retraining_started' when the training stack is installed; in a bare env it 500s on the training-module import."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Validation cases (negative)",
+      "item": [
+        {
+          "name": "N1 - Predict bad suffix (expect 422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"RELIANCE.US\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/predict",
+              "host": ["{{baseUrl}}"],
+              "path": ["predict"]
+            },
+            "description": "Symbol must end with .NS or .BO — expect HTTP 422 value_error."
+          },
+          "response": []
+        },
+        {
+          "name": "N2 - Predict normalize lowercase (expect normalize then 404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"reliance\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/predict",
+              "host": ["{{baseUrl}}"],
+              "path": ["predict"]
+            },
+            "description": "Lowercase, no suffix -> normalized to RELIANCE.NS, then 404 (no model). Confirms auto-uppercase + .NS append."
+          },
+          "response": []
+        },
+        {
+          "name": "N3 - Ask too short (expect 422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"hi\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ask",
+              "host": ["{{baseUrl}}"],
+              "path": ["ask"]
+            },
+            "description": "query must be >= 5 characters — expect HTTP 422 string_too_short."
+          },
+          "response": []
+        },
+        {
+          "name": "N4 - Batch empty list (expect 422)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbols\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/predict/batch",
+              "host": ["{{baseUrl}}"],
+              "path": ["predict", "batch"]
+            },
+            "description": "symbols must have 1-20 items — expect HTTP 422 too_short."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
