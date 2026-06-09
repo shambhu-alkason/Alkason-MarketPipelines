@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock Forecast — AI-MLOps</title>
+  <link rel="stylesheet" href="styles.css?v=5" />
+  <!-- React + TypeScript, no build step. The browser transpiles app.tsx via Babel standalone. -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+  <!-- TradingView Lightweight Charts (free, MIT) — renders OUR OHLCV data, no embed restrictions. -->
+  <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+  <div id="root">
+    <div class="boot">Loading forecast app…</div>
+  </div>
+
+  <script>
+    // Fetch the TypeScript/TSX source, transpile in-browser, then run it.
+    // isTSX + allExtensions make Babel parse JSX inside .tsx correctly.
+    (function () {
+      fetch('app.tsx?v=4')
+        .then(function (r) { if (!r.ok) throw new Error('Failed to load app.tsx: ' + r.status); return r.text(); })
+        .then(function (src) {
+          var out = Babel.transform(src, {
+            filename: 'app.tsx',
+            presets: [['typescript', { isTSX: true, allExtensions: true }], 'react']
+          }).code;
+          (0, eval)(out);
+        })
+        .catch(function (e) {
+          document.getElementById('root').innerHTML =
+            '<div class="boot error">Failed to start UI: ' + (e && e.message) + '</div>';
+          console.error(e);
+        });
+    })();
+  </script>
+</body>
+</html>

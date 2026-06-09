@@ -346,3 +346,39 @@ async def retrain(background_tasks: BackgroundTasks, trainer: str = "manual"):
         "message": "Retraining running in background. Check /models when complete.",
         "timestamp": datetime.now().isoformat(),
     }
+
+
+@app.get("/history/{symbol}", tags=["Prediction"])
+async def history(symbol: str, limit: int = 0):
+    """OHLCV candles for charting, from ingested raw data (data/raw/<symbol>.csv)."""
+    sym = _normalize_symbol(symbol)
+    path = Path(CFG["paths"]["raw_data"]) / f"{sym}.csv"
+    if not path.exists():
+        raise HTTPException(404, detail=f"No price history for {sym}. Run ingestion first.")
+    import pandas as pd
+    df = pd.read_csv(path)
+    df = df.dropna(subset=["date", "open", "high", "low", "close"]).sort_values("date")
+    if limit and limit > 0:
+        df = df.tail(limit)
+    candles = [
+        {
+            "time": str(r["date"])[:10],
+            "open": round(float(r["open"]), 2),
+            "high": round(float(r["high"]), 2),
+            "low": round(float(r["low"]), 2),
+            "close": round(float(r["close"]), 2),
+            "volume": int(r["volume"]) if pd.notna(r.get("volume")) else 0,
+        }
+        for _, r in df.iterrows()
+    ]
+    return {"symbol": sym, "candles": candles, "count": len(candles)}
+
+
+# ── Static UI (same-origin React dashboard at /ui) ────────────────────
+# Mounted last so it never shadows the API routes above. Served same-origin,
+# so the browser app can call the endpoints without CORS.
+_UI_DIR = Path(__file__).parents[2] / "ui"
+if _UI_DIR.is_dir():
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/ui", StaticFiles(directory=str(_UI_DIR), html=True), name="ui")
+    logger.info("Mounted UI from %s at /ui", _UI_DIR)
